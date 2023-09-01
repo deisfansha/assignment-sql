@@ -3,61 +3,76 @@ Soal 3a [
 	JOIN score s ON  s.`id_participant` = p.`id_participant`
 	JOIN task t ON t.`id_task` = s.`id_task`
 	WHERE p.`id_participant`= 1
+	ORDER BY t.`name_task` 
 ]
 
 Soal 3b [
 	SELECT p.`name`,  AVG(s.value) FROM participant p
-	JOIN scores s ON  s.`id_participant` = p.`id_participant`
-	GROUP BY p.`name`	
+	LEFT JOIN score s ON  s.`id_participant` = p.`id_participant`
+	GROUP BY p.id_participant
+	ORDER BY p.`name` ASC	
 ]
 
 Soal 3c [
 	SELECT 
     	CASE 
-        	WHEN average >= 0 AND average <= 20 THEN '0-20'
         	WHEN average > 20 AND average <= 40 THEN '21-40'
         	WHEN average > 40 AND average <= 60 THEN '41-60'
         	WHEN average > 60 AND average <= 80 THEN '61-80'
         	WHEN average > 80 AND average <= 100 THEN '81-100'
+        	ELSE '0-20'
     	END AS range_value,
-    	COUNT(average) AS total
+    	COUNT(average) AS "total participant"
 	FROM (
     	SELECT AVG(s.value) AS average 
     	FROM participant p
-    	JOIN score s ON s.`id_participant` = p.`id_participant`
-    	GROUP BY p.`name`
+    	LEFT JOIN score s ON s.`id_participant` = p.`id_participant`
+    	GROUP BY p.id_participant
 	) AS averages
 	GROUP BY range_value
-	ORDER BY range_value	
+	ORDER BY range_value ASC	
 ]
 
 Soal 3d [
 	SELECT 
     	CASE 
-        	WHEN average >= 0 AND average <= 20 THEN '0-20'
+        	
         	WHEN average > 20 AND average <= 40 THEN '21-40'
         	WHEN average > 40 AND average <= 60 THEN '41-60'
         	WHEN average > 60 AND average <= 80 THEN '61-80'
         	WHEN average > 80 AND average <= 100 THEN '81-100'
+        	ELSE '0-20'
     	END AS range_value,
-    	COUNT(average) AS total,
+    	COUNT(id) AS "total participant",
     	GROUP_CONCAT(name_participant) AS "name participant"
 	FROM (
-    	SELECT p.`name` AS name_participant, AVG(s.value) AS average 
+    	SELECT p.`id_participant` AS id , p.`name` AS name_participant, AVG(s.value) AS average 
     	FROM participant p
-    	JOIN score s ON s.`id_participant` = p.`id_participant`
-    	GROUP BY p.`name`
+    	LEFT JOIN score s ON s.`id_participant` = p.`id_participant`
+    	GROUP BY p.id_participant
 	) AS t
 	GROUP BY range_value
-	ORDER BY range_value
+	ORDER BY range_value DESC
 ]
 
 
-Soal 3d[
+Soal 3e[
 	ALTER TABLE score
 	ADD value_date DATE
 
-	Select value_date, count(id_score) as total from score 
-	group by value_date
-	order by value_date asc
+	WITH tanggal_sementara AS (
+  	SELECT '2023-08-14' AS tanggal
+  	UNION ALL SELECT '2023-08-15'
+  	UNION ALL SELECT '2023-08-16'
+  	UNION ALL SELECT '2023-08-17'
+  	UNION ALL SELECT '2023-08-18'
+  	UNION ALL SELECT '2023-08-19'
+	)
+
+	SELECT ts.tanggal AS DATE, COUNT(s.id_score) AS total
+	FROM tanggal_sementara ts
+	LEFT JOIN score s ON ts.tanggal = s.value_date
+	WHERE ts.tanggal BETWEEN '2023-08-14' AND '2023-08-19'
+	GROUP BY ts.tanggal, s.value_date
+	ORDER BY ts.tanggal ASC
 ]
